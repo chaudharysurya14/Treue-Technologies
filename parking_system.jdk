@@ -1,0 +1,144 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+class User {
+    private String username;
+
+    public User(String username) {
+        this.username = username;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+}
+
+class ParkingSpot {
+    private int spotNumber;
+    private boolean isAvailable;
+    private User bookedBy;
+
+    public ParkingSpot(int spotNumber) {
+        this.spotNumber = spotNumber;
+        this.isAvailable = true;
+    }
+
+    public int getSpotNumber() {
+        return spotNumber;
+    }
+
+    public boolean isAvailable() {
+        return isAvailable;
+    }
+
+    public User getBookedBy() {
+        return bookedBy;
+    }
+
+    public void bookSpot(User user) {
+        this.isAvailable = false;
+        this.bookedBy = user;
+    }
+
+    public void cancelBooking() {
+        this.isAvailable = true;
+        this.bookedBy = null;
+    }
+}
+
+class ParkingSystem {
+    private List<ParkingSpot> parkingSpots;
+
+    public ParkingSystem(int totalSpots) {
+        parkingSpots = new ArrayList<>();
+        for (int i = 1; i <= totalSpots; i++) {
+            parkingSpots.add(new ParkingSpot(i));
+        }
+    }
+
+    public ParkingSpot searchAvailableSpot() {
+        for (ParkingSpot spot : parkingSpots) {
+            if (spot.isAvailable()) {
+                return spot;
+            }
+        }
+        return null;
+    }
+
+    public void bookSpot(ParkingSpot spot, User user) {
+        if (spot != null) {
+            spot.bookSpot(user);
+            System.out.println("Spot " + spot.getSpotNumber() + " is booked by " + user.getUsername());
+        } else {
+            System.out.println("No available spots at the moment.");
+        }
+    }
+
+    public void cancelBooking(ParkingSpot spot, User user) {
+        if (spot != null && !spot.isAvailable() && spot.getBookedBy() == user) {
+            spot.cancelBooking();
+            System.out.println("Booking for spot " + spot.getSpotNumber() + " is canceled by " + user.getUsername());
+        } else {
+            System.out.println("Invalid spot or user.");
+        }
+    }
+}
+
+public class ParkingSystemApp {
+    public static void main(String[] args) {
+        int totalSpots = 10;
+        ParkingSystem parkingSystem = new ParkingSystem(totalSpots);
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("\nOptions:");
+            System.out.println("1. Search for available parking spot");
+            System.out.println("2. Book a parking spot");
+            System.out.println("3. Cancel booking");
+            System.out.println("4. Exit");
+            System.out.print("Enter your choice: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline character
+
+            switch (choice) {
+                case 1:
+                    ParkingSpot availableSpot = parkingSystem.searchAvailableSpot();
+                    if (availableSpot != null) {
+                        System.out.println("Available spot found: " + availableSpot.getSpotNumber());
+                    } else {
+                        System.out.println("No available spots at the moment.");
+                    }
+                    break;
+
+                case 2:
+                    System.out.print("Enter your username: ");
+                    String username = scanner.nextLine();
+                    User user = new User(username);
+                    ParkingSpot spotToBook = parkingSystem.searchAvailableSpot();
+                    parkingSystem.bookSpot(spotToBook, user);
+                    break;
+
+                case 3:
+                    System.out.print("Enter your username: ");
+                    String cancelUsername = scanner.nextLine();
+                    User cancelUser = new User(cancelUsername);
+                    System.out.print("Enter spot number to cancel booking: ");
+                    int spotNumber = scanner.nextInt();
+                    scanner.nextLine(); // Consume newline character
+                    ParkingSpot spotToCancel = parkingSystem.parkingSpots.get(spotNumber - 1);
+                    parkingSystem.cancelBooking(spotToCancel, cancelUser);
+                    break;
+
+                case 4:
+                    scanner.close();
+                    System.exit(0);
+                    break;
+
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+                    break;
+            }
+        }
+    }
+}
